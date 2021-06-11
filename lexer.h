@@ -29,46 +29,26 @@ namespace parse {
             std::string value;
         };
 
-        struct Class {
-        };    // Лексема «class»
-        struct Return {
-        };   // Лексема «return»
-        struct If {
-        };       // Лексема «if»
-        struct Else {
-        };     // Лексема «else»
-        struct Def {
-        };      // Лексема «def»
-        struct Newline {
-        };  // Лексема «конец строки»
-        struct Print {
-        };    // Лексема «print»
-        struct Indent {
-        };  // Лексема «увеличение отступа», соответствует двум пробелам
-        struct Dedent {
-        };  // Лексема «уменьшение отступа»
-        struct Eof {
-        };     // Лексема «конец файла»
-        struct And {
-        };     // Лексема «and»
-        struct Or {
-        };      // Лексема «or»
-        struct Not {
-        };     // Лексема «not»
-        struct Eq {
-        };      // Лексема «==»
-        struct NotEq {
-        };   // Лексема «!=»
-        struct LessOrEq {
-        };     // Лексема «<=»
-        struct GreaterOrEq {
-        };  // Лексема «>=»
-        struct None {
-        };         // Лексема «None»
-        struct True {
-        };         // Лексема «True»
-        struct False {
-        };        // Лексема «False»
+        struct Class {};    // Лексема «class»
+        struct Return {};   // Лексема «return»
+        struct If {};       // Лексема «if»
+        struct Else {};     // Лексема «else»
+        struct Def {};      // Лексема «def»
+        struct Newline {};  // Лексема «конец строки»
+        struct Print {};    // Лексема «print»
+        struct Indent {};  // Лексема «увеличение отступа», соответствует двум пробелам
+        struct Dedent {};  // Лексема «уменьшение отступа»
+        struct Eof {};     // Лексема «конец файла»
+        struct And {};     // Лексема «and»
+        struct Or {};      // Лексема «or»
+        struct Not {};     // Лексема «not»
+        struct Eq {};      // Лексема «==»
+        struct NotEq {};   // Лексема «!=»
+        struct LessOrEq {};     // Лексема «<=»
+        struct GreaterOrEq {};  // Лексема «>=»
+        struct None {};         // Лексема «None»
+        struct True {};         // Лексема «True»
+        struct False {};        // Лексема «False»
     }  // namespace token_type
 
     using TokenBase
@@ -124,11 +104,13 @@ namespace parse {
         template<typename T>
         const T& Expect() const {
             using namespace std::literals;
-            using namespace std::literals;
             if (CurrentToken().Is<T>()) {
                 return CurrentToken().As<T>();
+            } else {
+                std::stringstream ss;
+                ss << T();
+                throw LexerError("Lexer expects token "s + ss.str());
             }
-            throw LexerError("Lexer expects other token"s);
         }
 
         // Метод проверяет, что текущий токен имеет тип T, а сам токен содержит значение value.
@@ -138,7 +120,9 @@ namespace parse {
             using namespace std::literals;
             auto& token = Expect<T>();
             if (token.value != value) {
-                throw LexerError("Lexer expects other token"s);
+                std::stringstream ss;
+                ss << T();
+                throw LexerError("Lexer expects token "s + ss.str());
             }
         }
 
@@ -206,24 +190,16 @@ namespace parse {
                                               {'/'}};
 
         void ReadToken();
+        Token ReadIdentifiersOrNumber(char c, std::istream& ss);
+        Token ReadStrings(char c, std::istream& ss);
+        Token ReadNumber(char c, std::istream& ss);
+        char ReadChar(std::istream& ss);
+        void ReadIndents(size_t count_spaces);
 
         bool IsPunct(char c) const;
-
         bool IsEmptyLine(const std::string& line) const;
-
         bool IsString(char c) const;
-
         bool IsIdentifiersOrNumber(char c) const;
-
-        Token ReadIdentifiersOrNumber(char c, std::istream& ss);
-
-        Token ReadStrings(char c, std::istream& ss);
-
-        Token ReadNumber(char c, std::istream& ss);
-
-        char ReadChar(std::istream& ss);
-
-        void ReadIndents(size_t count_spaces);
     };
 
 }  // namespace parse

@@ -97,7 +97,7 @@ namespace parse {
             if (!IsEmptyLine(line)) {
                 auto count_space = line.find_first_not_of(' ');
                 if (count_space % 2 != 0) {
-                    throw LexerError("Invalid indents");
+                    throw LexerError("Invalid indents"s);
                 } else {
                     ReadIndents(count_space / 2);
                 }
@@ -212,7 +212,7 @@ namespace parse {
 
     char Lexer::ReadChar(istream& ss) {
         if (!ss) {
-            throw LexerError("Failed read");
+            throw LexerError("Failed read"s);
         }
         return static_cast<char>(ss.get());
     }
@@ -237,7 +237,7 @@ namespace parse {
             int result = stoi(parsed_num);
             return token_type::Number{result};
         } catch (...) {
-            throw LexerError("Number conversion error");
+            throw LexerError("Number conversion error"s);
         }
     }
 
