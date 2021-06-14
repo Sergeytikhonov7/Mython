@@ -15,6 +15,9 @@ namespace ast {
     namespace {
         const string ADD_METHOD = "__add__"s;
         const string INIT_METHOD = "__init__"s;
+        const string DIV_METHOD = "__div__"s;
+        const string MULT_METHOD = "__mul__"s;
+        const string SUB_METHOD = "__sub__"s;
     }  // namespace
 
     ObjectHolder Assignment::Execute(Closure& closure, Context& context) {
@@ -36,7 +39,7 @@ namespace ast {
     ObjectHolder VariableValue::Execute(Closure& closure, [[maybe_unused]] Context& context) {
         const auto& var_name = dotted_ids_.front();
         if (!closure.count(var_name)) {
-            throw std::runtime_error("unknown variable " + var_name);
+            throw std::runtime_error("unknown variable "s + var_name);
         }
 
         return accumulate(
@@ -70,7 +73,7 @@ namespace ast {
                     if (object) {
                         object->Print(output, context);
                     } else {
-                        output << "None";
+                        output << "None"s;
                     }
                     first_ = false;
                 } else {
@@ -79,7 +82,7 @@ namespace ast {
                     if (object) {
                         object->Print(output, context);
                     } else {
-                        output << "None";
+                        output << "None"s;
                     }
                 }
             }
@@ -109,14 +112,14 @@ namespace ast {
             }
         }
 
-        throw std::runtime_error("Bad Method call: " + method_);
+        throw std::runtime_error("Bad Method call: "s + method_);
     }
 
     ObjectHolder Stringify::Execute(Closure& closure, Context& context) {
         std::ostringstream out;
         ObjectHolder str = argument_->Execute(closure, context);
-        if (str.Get() == NULL) {
-            return ObjectHolder::Own(runtime::String("None"));
+        if (str.Get() == nullptr) {
+            return ObjectHolder::Own(runtime::String("None"s));
         } else {
             str->Print(out, context);
             return ObjectHolder::Own(runtime::String(out.str()));
@@ -154,7 +157,7 @@ namespace ast {
             const auto result = executeBinaryOperationOnClasses(
                     lhs_h.TryAs<runtime::ClassInstance>(),
                     rhs_h,
-                    "__add__",
+                    ADD_METHOD,
                     context
             );
             if (result) {
@@ -162,7 +165,7 @@ namespace ast {
             }
         }
 
-        throw runtime_error("Bad Addition!");
+        throw runtime_error("Bad Addition!"s);
     }
 
 
@@ -181,7 +184,7 @@ namespace ast {
             const auto result = executeBinaryOperationOnClasses(
                     lhs_h.TryAs<runtime::ClassInstance>(),
                     rhs_h,
-                    "__sub__",
+                    SUB_METHOD,
                     context
             );
             if (result) {
@@ -189,7 +192,7 @@ namespace ast {
             }
         }
 
-        throw runtime_error("Bad Subtraction!");
+        throw runtime_error("Bad Subtraction!"s);
     }
 
     ObjectHolder Mult::Execute(Closure& closure, Context& context) {
@@ -207,7 +210,7 @@ namespace ast {
             const auto result = executeBinaryOperationOnClasses(
                     lhs_h.TryAs<runtime::ClassInstance>(),
                     rhs_h,
-                    "__mul__",
+                    MULT_METHOD,
                     context
             );
             if (result) {
@@ -215,7 +218,7 @@ namespace ast {
             }
         }
 
-        throw runtime_error("Bad Multiplication!");
+        throw runtime_error("Bad Multiplication!"s);
 
     }
 
@@ -225,7 +228,7 @@ namespace ast {
 
         if ((lhs_h.TryAs<runtime::Number>()) && (rhs_h.TryAs<runtime::Number>())) {
             if (rhs_h.TryAs<runtime::Number>()->GetValue() == 0) {
-                throw runtime_error("Zero Division!");
+                throw runtime_error("Zero Division!"s);
             }
 
             return runtime::ObjectHolder::Own(runtime::Number(
@@ -238,7 +241,7 @@ namespace ast {
             const auto result = executeBinaryOperationOnClasses(
                     lhs_h.TryAs<runtime::ClassInstance>(),
                     rhs_h,
-                    "__div__",
+                    DIV_METHOD,
                     context
             );
             if (result) {
@@ -246,7 +249,7 @@ namespace ast {
             }
         }
 
-        throw runtime_error("Bad Division!");
+        throw runtime_error("Bad Division!"s);
     }
 
     ObjectHolder Compound::Execute(Closure& closure, Context& context) {
@@ -391,12 +394,12 @@ namespace ast {
 
     ObjectHolder NewInstance::Execute(Closure& closure, Context& context) {
         auto* new_instance = new runtime::ClassInstance(class__);
-        if (new_instance->HasMethod("__init__", args_.size())) {
+        if (new_instance->HasMethod(INIT_METHOD, args_.size())) {
             std::vector<ObjectHolder> actual_args;
             for (const auto& statement : args_) {
                 actual_args.push_back(statement->Execute(closure, context));
             }
-            new_instance->Call("__init__", actual_args, context);
+            new_instance->Call(INIT_METHOD, actual_args, context);
         }
 
         return ObjectHolder::Share(*new_instance);
